@@ -40,6 +40,10 @@ pnpm dsh web
 
 `pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
 
+### Windows 桌面应用
+
+Windows 桌面应用把同一个本地 Web UI 放入原生应用窗口中。源码运行方式和安装程序构建方法见[桌面应用指南](apps/desktop/README.zh.md)。
+
 ## 社区与支持
 
 - 欢迎通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交反馈或 bug 报告。

@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-16-projectless-chat-sessions.md
+2026-08-16-projectless-chat-sessions.md: b0d87d010ebaf772d63aaff40064ca05f1fc5869
+2026-08-16-projectless-chat-sessions.zh.md: 3822491cbd4e5a08d64b1c2794cc5d37887a0ed6

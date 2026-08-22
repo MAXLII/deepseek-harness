@@ -21,6 +21,12 @@ export interface IWorkspaces {
    */
   connectWorkspace(workspaceId: WorkspaceId): Promise<SessionId>
   /**
+   * Connect the projectless chat target to its reusable or freshly created
+   * ungrouped blank session.
+   * @returns the connected session id.
+   */
+  connectProjectless(): Promise<SessionId>
+  /**
    * The New Session flow: connect the explicit, current-Session, or recent
    * Workspace and open the resulting session; failures surface on the session
    * list state.
@@ -28,6 +34,8 @@ export interface IWorkspaces {
    * Session's Workspace before falling back to the recency projection.
    */
   startSession(workspaceId?: WorkspaceId): void
+  /** Start and open an explicitly projectless, ungrouped chat session. */
+  startProjectlessSession(): void
   /**
    * Register an existing path as a Workspace.
    * @param input - the Host create payload.

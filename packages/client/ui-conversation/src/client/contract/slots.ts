@@ -476,6 +476,8 @@ export interface ConversationInjected {
    * When a blank session is already current, carry its draft to the target.
    */
   selectWorkspace: (workspaceId: WorkspaceId) => Promise<void>
+  /** Open projectless chat, carrying a blank session's draft when needed. */
+  selectProjectless: () => Promise<void>
   /**
    * Framework-bound sources. `composerBlock` is this session's block when a
    * plugin raised one; the reason is the blocker's own localized copy, which
@@ -816,6 +818,9 @@ export interface EmptyWorkspaceOwnerProps {
   anchorRef?: RefObject<HTMLElement>
   /** Currently active workspace (renders a trailing check in the picker list). */
   selectedId?: WorkspaceId | undefined
+  /** The current or pending target is an ungrouped projectless chat. */
+  projectless: boolean
   onPick: (workspaceId: WorkspaceId) => void
+  onProjectless: () => void
   onClose: () => void
 }

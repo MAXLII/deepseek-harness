@@ -55,6 +55,8 @@ export class WorkspaceRuntime implements IWorkspaces {
   private readonly manager: WorkspaceManager
   /** In-flight blank-session creates keyed by workspace (connectWorkspace coalescing). */
   private readonly connecting = new Map<WorkspaceId, Promise<SessionId>>()
+  /** In-flight ungrouped blank-session create (projectless connect coalescing). */
+  private projectlessConnecting: Promise<SessionId> | undefined
   /** Guards the runtime-owned one-shot initial-selection subscription. */
   private initialSelectionStarted = false
 
@@ -116,6 +118,30 @@ export class WorkspaceRuntime implements IWorkspaces {
   }
 
   /**
+   * Resolve the blank session used by projectless chat. Any non-archived,
+   * ungrouped blank is reusable regardless of cwd: projectless is an
+   * accounting mode, while the Host still supplies its normal execution cwd.
+   * Concurrent callers share one create so opening the app cannot mint
+   * duplicate empty chats.
+   * @returns the reusable or newly created ungrouped session id.
+   */
+  async connectProjectless(): Promise<SessionId> {
+    if (this.projectlessConnecting !== undefined) return this.projectlessConnecting
+    const workspace = this.list.getSnapshot()
+    const accounted = new Set(workspace.items.flatMap(item => item.sessionIds))
+    const sessions = this.sessions.list.getSnapshot()
+    for (const id of sessions.ids) {
+      const summary = sessions.byId[id]
+      if (summary !== undefined && summary.blank && !accounted.has(id)
+        && !workspace.archivedSessionIds.includes(id)) return id
+    }
+    const attempt = this.sessions.create()
+      .finally(() => { this.projectlessConnecting = undefined })
+    this.projectlessConnecting = attempt
+    return attempt
+  }
+
+  /**
    * Follow the first complete Workspace/Session baseline and select a default
    * session exactly once. A restored current session wins; otherwise the most
    * recent Workspace is connected (reusing or creating its blank session).
@@ -136,12 +162,15 @@ export class WorkspaceRuntime implements IWorkspaces {
       if (!workspace.baselinesReady) return
       const current = this.sessions.list.getSnapshot().current
       const target = workspace.recentWorkspaceId
-      if (current !== undefined || target === undefined) {
+      if (current !== undefined) {
         state = 'done'
         return
       }
       state = 'connecting'
-      void this.connectWorkspace(target).then(
+      const connection = target === undefined
+        ? this.connectProjectless()
+        : this.connectWorkspace(target)
+      void connection.then(
         (sessionId) => {
           if (disposed) return
           if (this.sessions.list.getSnapshot().current === undefined) {
@@ -169,7 +198,7 @@ export class WorkspaceRuntime implements IWorkspaces {
    * button, workspace browser): resolve the target Workspace — explicit wins,
    * then the current Session's Workspace, then the recent-Workspace
    * projection — connect its blank session and navigate there; with no
-   * Workspace at all, clear the selection into the New Session view state.
+   * Workspace at all, open projectless chat instead.
    * Connect failures are non-fatal (console diagnostics; the current view
    * stays usable).
    * @param workspaceId - explicit target Workspace for scoped actions.
@@ -180,14 +209,29 @@ export class WorkspaceRuntime implements IWorkspaces {
     const currentWorkspaceId = current === undefined
       ? undefined
       : workspace.items.find(item => item.sessionIds.includes(current))?.workspaceId
+    // An explicitly ungrouped current Session is itself a target choice:
+    // New Session must stay in projectless mode instead of unexpectedly
+    // jumping to a merely recent Workspace.
+    if (workspaceId === undefined && current !== undefined && currentWorkspaceId === undefined) {
+      this.startProjectlessSession()
+      return
+    }
     const target = workspaceId ?? currentWorkspaceId ?? workspace.recentWorkspaceId
     if (target === undefined) {
-      this.sessions.clear()
+      this.startProjectlessSession()
       return
     }
     void this.connectWorkspace(target).then(
       (sessionId) => { this.sessions.open(sessionId) },
       (reason: unknown) => { console.warn('new session failed:', reason) },
+    )
+  }
+
+  /** Start an explicitly projectless chat and open its ungrouped blank session. */
+  startProjectlessSession(): void {
+    void this.connectProjectless().then(
+      (sessionId) => { this.sessions.open(sessionId) },
+      (reason: unknown) => { console.warn('new projectless session failed:', reason) },
     )
   }
 

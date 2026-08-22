@@ -399,7 +399,7 @@ describe('WorkspaceRuntime', () => {
     await expect(workspaces.insertBefore(wid('ghost'))).rejects.toThrow(/workspace-not-found: gone/)
   })
 
-  it('targets New Session at explicit, current-session, then recent Workspaces and clears with none', async () => {
+  it('targets New Session at explicit, current-session, then recent Workspaces and projectless with none', async () => {
     const ctx = new Context()
     const api = new FakeApiClient()
     const sessions = new SessionRuntime(ctx, api, fakeRemote())
@@ -433,13 +433,44 @@ describe('WorkspaceRuntime', () => {
     await Promise.resolve()
     expect(connect).toHaveBeenLastCalledWith(wid('recent-home'))
 
+    api.onList = () => Promise.resolve(ok({ items: [
+      { sessionId: sid('plain-current'), updatedAt: 3, running: false, blank: false },
+    ] as never[] }))
+    await sessions.refresh()
+    sessions.open(sid('plain-current'))
+    const projectlessCurrent = vi.spyOn(workspaces, 'startProjectlessSession').mockImplementation(() => {})
+    workspaces.startSession()
+    expect(projectlessCurrent).toHaveBeenCalledOnce()
+
     const emptyCtx = new Context()
     const emptyApi = new FakeApiClient()
     const emptySessions = new SessionRuntime(emptyCtx, emptyApi, fakeRemote())
     const emptyWorkspaces = new WorkspaceRuntime(emptyCtx, emptyApi, emptySessions)
-    const clear = vi.spyOn(emptySessions, 'clear')
+    const projectless = vi.spyOn(emptyWorkspaces, 'startProjectlessSession').mockImplementation(() => {})
     emptyWorkspaces.startSession()
-    expect(clear).toHaveBeenCalledOnce()
+    expect(projectless).toHaveBeenCalledOnce()
+  })
+
+  it('reuses an ungrouped blank for projectless chat and creates without workspace otherwise', async () => {
+    const ctx = new Context()
+    const api = new FakeApiClient()
+    const sessions = new SessionRuntime(ctx, api, fakeRemote())
+    const workspaces = new WorkspaceRuntime(ctx, api, sessions)
+    api.onWorkspaceList = () => Promise.resolve(ok({
+      items: [workspace('alpha', [sid('accounted')])] as never[],
+    }))
+    api.onList = () => Promise.resolve(ok({ items: [
+      { sessionId: sid('accounted'), updatedAt: 2, running: false, blank: true, cwd: '/w/alpha' },
+      { sessionId: sid('plain'), updatedAt: 1, running: false, blank: true, cwd: '/host/default' },
+    ] as never[] }))
+    await Promise.all([workspaces.refresh(), sessions.refresh()])
+    await expect(workspaces.connectProjectless()).resolves.toBe('plain')
+    expect(api.callsOf('session.create')).toEqual([])
+
+    await workspaces.archiveSession(sid('plain'))
+    api.onCreate = () => Promise.resolve(ok({ sessionId: sid('fresh-plain') }))
+    await expect(workspaces.connectProjectless()).resolves.toBe('fresh-plain')
+    expect(api.callsOf('session.create')).toEqual([{}])
   })
 
   it('archives a session, projects the set from the response, list, and frame, and clears only the current one', async () => {
@@ -549,7 +580,7 @@ describe('startInitialSelection', () => {
     stop()
   })
 
-  it('stays idle when a session is already current or no recent Workspace exists', async () => {
+  it('keeps an existing current session and starts projectless chat when no recent Workspace exists', async () => {
     const withCurrent = bench()
     withCurrent.api.onList = () => Promise.resolve(ok({
       items: [{ sessionId: sid('s1'), updatedAt: 1, running: false, blank: false }] as never[],
@@ -568,7 +599,8 @@ describe('startInitialSelection', () => {
     await noRecent.workspaces.refresh()
     await noRecent.sessions.refresh()
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(noRecent.api.callsOf('session.create')).toHaveLength(0)
+    expect(noRecent.api.callsOf('session.create')).toEqual([{}])
+    expect(noRecent.sessions.list.getSnapshot().current).toBe('fk-new')
     expect(() => noRecent.workspaces.startInitialSelection()).toThrow(/already started/)
     stopEmpty()
   })

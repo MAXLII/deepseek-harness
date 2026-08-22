@@ -36,6 +36,10 @@ pnpm dsh web
 
 `pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
 
+### Windows desktop app
+
+The Windows desktop app wraps the same local Web UI in a native application window. To run it from source or build an installer, see the [desktop app guide](apps/desktop/README.md).
+
 ## Community and support
 
 - Feel free to submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).

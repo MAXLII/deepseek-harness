@@ -210,10 +210,9 @@ export function apply(ctx: Context): void {
       'conversation.hero.workspace': { kind: 'single', scope: 'root' },
       'conversation.hero.agentPreset': { kind: 'single', scope: 'root' },
     },
-    inject: (sessionId: SessionId | undefined): ConversationInjected => ({
-      hooks: { composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId) },
-      selectWorkspace: async (workspaceId) => {
-        const nextId = await workspaces.connectWorkspace(workspaceId)
+    inject: (sessionId: SessionId | undefined): ConversationInjected => {
+      const selectTarget = async (connect: () => Promise<SessionId>): Promise<void> => {
+        const nextId = await connect()
         if (sessionId !== undefined && nextId !== sessionId) {
           const from = inputHub.shell(sessionId)
           const draft = from.snapshot.draft
@@ -230,8 +229,13 @@ export function apply(ctx: Context): void {
           }
         }
         sessions.open(nextId)
-      },
-    }),
+      }
+      return {
+        hooks: { composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId) },
+        selectWorkspace: workspaceId => selectTarget(() => workspaces.connectWorkspace(workspaceId)),
+        selectProjectless: () => selectTarget(() => workspaces.connectProjectless()),
+      }
+    },
   }, ConversationRoot)
 
   // The strict session body fills the resident scrollport without owning it;

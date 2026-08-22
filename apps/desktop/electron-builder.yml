@@ -1,0 +1,26 @@
+appId: ai.deepseek.harness.desktop
+productName: DeepSeek Harness
+asar: false
+npmRebuild: false
+directories:
+  output: dist
+files:
+  - lib/**
+  - package.json
+extraResources:
+  - from: build/node/node.exe
+    to: node/node.exe
+  - from: build/runtime/@deepseek-ai
+    to: app/node_modules/@deepseek-ai
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: DeepSeek-Harness-Setup-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: DeepSeek Harness

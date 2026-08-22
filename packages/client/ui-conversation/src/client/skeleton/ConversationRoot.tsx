@@ -14,7 +14,7 @@ export type ConversationRootProps = ConversationSlotProps
 
 export function ConversationRoot({
   sessionId, useSession, useSessions, useWorkspaces, useInput, useComposerBlock,
-  renderSlot, renderSlotChain, selectWorkspace, t,
+  renderSlot, renderSlotChain, selectWorkspace, selectProjectless, t,
 }: ConversationRootProps) {
   const openState = useSession(s => s.openState)
   const composerPhase = useSession(s => s.composerPhase)
@@ -30,6 +30,7 @@ export function ConversationRoot({
 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pendingWorkspaceId, setPendingWorkspaceId] = useState<WorkspaceId | undefined>()
+  const [pendingProjectless, setPendingProjectless] = useState(false)
   const pickerAnchor = useRef<HTMLButtonElement>(null)
 
   // Publishes the seat's live height as --dsh-composer-height on the scroll
@@ -65,6 +66,14 @@ export function ConversationRoot({
     }
   }, [pendingWorkspaceId, sessionWorkspace?.workspaceId, workspaces.phase, pendingWorkspace])
 
+  // A projectless pick is pending only until navigation lands in an
+  // ungrouped session. Picking a real workspace supersedes it immediately.
+  useEffect(() => {
+    if (pendingProjectless && sessionId !== undefined && sessionWorkspace === undefined) {
+      setPendingProjectless(false)
+    }
+  }, [pendingProjectless, sessionId, sessionWorkspace])
+
   // While a session is still replaying (loading + blank) the hero/docked
   // choice is unknowable — render the composer hidden instead of flashing
   // the centered hero and snapping to the docked bar (or vice versa).
@@ -89,7 +98,11 @@ export function ConversationRoot({
   //      flash on refresh (empty cwd → placeholder);
   //   5. list ready but no owning workspace (deleted from the sidebar) →
   //      placeholder, never the deleted folder's name via cwd.
-  const chipTitle = pendingWorkspace?.title
+  const projectless = pendingProjectless
+    || (sessionId !== undefined && sessionWorkspace === undefined && workspaces.phase === 'ready')
+  const chipTitle = projectless
+    ? t('hero.projectless')
+    : pendingWorkspace?.title
     ?? (sessionId === undefined
       ? undefined
       : sessionWorkspace?.title
@@ -110,12 +123,20 @@ export function ConversationRoot({
         open: pickerOpen,
         anchorRef: pickerAnchor,
         selectedId: pendingWorkspaceId ?? sessionWorkspace?.workspaceId,
+        projectless,
         onPick: (workspaceId) => {
           setPickerOpen(false)
+          setPendingProjectless(false)
           setPendingWorkspaceId(workspaceId)
           void selectWorkspace(workspaceId).catch(() => {
             setPendingWorkspaceId(current => current === workspaceId ? undefined : current)
           })
+        },
+        onProjectless: () => {
+          setPickerOpen(false)
+          setPendingWorkspaceId(undefined)
+          setPendingProjectless(true)
+          void selectProjectless().catch(() => { setPendingProjectless(false) })
         },
         onClose: () => { setPickerOpen(false) },
       })}
@@ -123,15 +144,14 @@ export function ConversationRoot({
     </div>
   )
 
-  // The placeholder chip ("Choose workspace") and the Workspace-trigger input travel
-  // together: no workspace picked yet (cold start, no session at all), or a
-  // blank session whose workspace vanished (deleted from the sidebar). The
-  // bar is ONE session-maybe slot rendered unconditionally — inert is a prop,
-  // not a different tree, so the textarea DOM survives the transition.
-  const inert = sessionId === undefined || (hero && chipTitle === undefined)
+  // Before any session exists, the placeholder chip and Workspace-trigger
+  // input travel together. Projectless chat is a real ungrouped session, so
+  // its composer is live and the chip names the mode. The bar is ONE
+  // session-maybe slot rendered unconditionally — inert is a prop, not a
+  // different tree, so the textarea DOM survives the transition.
+  const inert = sessionId === undefined
   // A raised block is the same inert posture with the blocker's own reason:
-  // one disabled textarea, never a second tree. The no-workspace state wins
-  // when both hold — picking a workspace is the earlier prerequisite.
+  // one disabled textarea, never a second tree.
   const blocked = !inert && composerBlock !== undefined
   const inputBar = renderSlot('conversation.composer.bar', {
     variant: hero ? 'hero' : 'composer',

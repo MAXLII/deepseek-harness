@@ -65,9 +65,12 @@ describe('web e2e: startup auto-selection', () => {
     await scaffold?.close()
   })
 
-  it('keeps the resident Hero and composer nodes when the first Workspace session appears', async () => {
+  it('starts projectless and keeps the resident Hero and composer nodes when the first Workspace session appears', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-first-workspace-stable-tree'))
     await page.locator(`${ROOT_PHASE}[data-phase="hero"]`).waitFor({ timeout: 15_000 })
+    const workspaceChip = page.getByRole('button', { name: 'Choose workspace' })
+    expect(await workspaceChip.textContent()).toContain('Projectless chat')
+    expect(await page.locator('textarea:enabled[placeholder="Describe what you want to build"]').count()).toBe(1)
     const headline = page.getByText('Into the Unknown', { exact: true })
     const fishHitbox = headline.locator('xpath=preceding-sibling::span[1]')
     const fish = fishHitbox.locator('svg')

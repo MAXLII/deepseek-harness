@@ -2,7 +2,7 @@
 
 English | [中文](index.zh.md)
 
-Start the Web UI through the [root README](../../../README.md#run); the command prints its URL. This guide begins after that server is running. The `dsh` process uses its invoking directory as the default filesystem location, but a fresh Web UI has no selected workspace until you add one.
+Start the Web UI through the [root README](../../../README.md#run); the command prints its URL. This guide begins after that server is running. The `dsh` process uses its invoking directory as the default filesystem location.
 
 ## Configure a model
 
@@ -10,9 +10,11 @@ Open **Settings → Models**, enter a [DeepSeek API key](https://platform.deepse
 
 The [model configuration guide](./providers.md) covers other providers and custom OpenAI-compatible endpoints.
 
-## Choose a workspace
+## Start projectless or choose a workspace
 
-Click **Choose workspace**, add the project directory where you started `dsh`, and select it. The session composer remains unavailable until a workspace is selected.
+You can start chatting without adding a project. When no workspace exists, the Web UI opens a reusable **Projectless chat** session automatically. You can also open the workspace menu and choose **Projectless chat** at any time; these sessions appear under **Ungrouped** in the sidebar.
+
+For repository work, click the workspace chip, add the project directory where you started `dsh`, and select it. Projectless sessions are not attached to a workspace, but the agent still uses the `dsh` process's default filesystem location when a tool needs a working directory.
 
 ## Run a task
 
@@ -20,7 +22,7 @@ Start a session and send:
 
 > Summarize this repository and identify its main packages.
 
-The agent can read and edit workspace files, run commands, delegate work, and maintain a plan. The Web UI asks before operations that require approval under the active permission policy.
+In a workspace session, the agent can read and edit project files, run commands, delegate work, and maintain a plan. The Web UI asks before operations that require approval under the active permission policy.
 
 ## Continue
 

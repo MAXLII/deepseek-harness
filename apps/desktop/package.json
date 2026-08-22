@@ -1,0 +1,28 @@
+{
+  "name": "@deepseek-ai/dsh-desktop",
+  "description": "DeepSeek Harness desktop application for Windows",
+  "version": "0.1.0-rc.5",
+  "private": true,
+  "type": "module",
+  "main": "lib/main.js",
+  "license": "MIT",
+  "author": "DeepSeek AI",
+  "scripts": {
+    "build": "tsc -b && tsdown",
+    "start": "electron .",
+    "prepare-runtime": "node scripts/prepare-runtime.mjs",
+    "pack:win": "pnpm run prepare-runtime && electron-builder --win dir",
+    "dist:win": "pnpm run prepare-runtime && electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis-plugin-group": "workspace:^",
+    "@deepseek-ai/dsh": "workspace:^"
+  },
+  "devDependencies": {
+    "electron": "43.3.0",
+    "electron-builder": "26.15.3",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

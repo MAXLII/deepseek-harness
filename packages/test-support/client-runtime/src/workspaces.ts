@@ -61,6 +61,14 @@ export class TestWorkspaces implements IWorkspaces {
     return `session-of-${workspaceId}` as SessionId
   }
 
+  /** Connect projectless chat to an ungrouped blank session (recorded). */
+  async connectProjectless(): Promise<SessionId> {
+    this.calls.push({ method: 'connectProjectless', args: [] })
+    const stub = this.stubs.get('connectProjectless')
+    if (stub !== undefined) return await (stub() as Promise<SessionId>)
+    return 'session-projectless' as SessionId
+  }
+
   /**
    * New-session flow (recorded; stubbed behavior runs when installed).
    * @param workspaceId - optional explicit workspace target.
@@ -68,6 +76,12 @@ export class TestWorkspaces implements IWorkspaces {
   startSession(workspaceId?: WorkspaceId): void {
     this.calls.push({ method: 'startSession', args: [workspaceId] })
     this.stubs.get('startSession')?.(workspaceId)
+  }
+
+  /** Start an explicitly projectless session (recorded). */
+  startProjectlessSession(): void {
+    this.calls.push({ method: 'startProjectlessSession', args: [] })
+    this.stubs.get('startProjectlessSession')?.()
   }
 
   /**
