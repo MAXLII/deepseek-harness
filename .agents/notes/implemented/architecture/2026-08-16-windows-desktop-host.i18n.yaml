@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-16-windows-desktop-host.md
-2026-08-16-windows-desktop-host.md: 81da60ea74099f1178ee7a287bf0c944ead65315
-2026-08-16-windows-desktop-host.zh.md: 0fe2a907380132c1042944de5adaa63b5f53e251
+2026-08-16-windows-desktop-host.md: cafa1b282368b51e96b382c3f7ea3383f048f1c1
+2026-08-16-windows-desktop-host.zh.md: 9efe0cf86f2008669a1a0f4be11dadc509806c75

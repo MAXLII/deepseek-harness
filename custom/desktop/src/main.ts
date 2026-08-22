@@ -5,12 +5,14 @@
  */
 
 import { app, BrowserWindow, dialog, session, shell } from 'electron'
+import { join } from 'node:path'
 import {
   desktopNodeExecutable,
   startDesktopHarnessProcess,
   type DesktopHarnessProcess,
 } from './harness-process.ts'
 import { isExternalWebUrl, isHarnessUrl } from './security.ts'
+import { pruneDanglingProfileFallback } from './profile-fallback.ts'
 
 let harness: DesktopHarnessProcess | undefined
 let mainWindow: BrowserWindow | undefined
@@ -69,6 +71,9 @@ async function boot(): Promise<void> {
     callback(false)
   })
   process.chdir(app.getPath('home'))
+  const dshHome = process.env.DSH_HOME?.trim() || join(app.getPath('home'), '.dsh')
+  const removedFallbacks = pruneDanglingProfileFallback(dshHome)
+  if (removedFallbacks > 0) console.log(`desktop: removed ${String(removedFallbacks)} stale profile module link(s)`)
   harness = await startDesktopHarnessProcess({
     nodeExecutable: desktopNodeExecutable(app.isPackaged, process.resourcesPath),
     cwd: app.getPath('home'),

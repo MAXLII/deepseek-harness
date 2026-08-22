@@ -31,6 +31,8 @@ pnpm desktop:dist:win
 
 Artifacts are written under `custom/desktop/dist/`. Packaging copies the Node.js executable used for the build into the application, so the installed desktop app does not depend on Node.js being installed or available on `PATH`.
 
+On startup, the desktop host removes only dangling Junctions and symbolic links from the generated `$DSH_HOME/profiles/node_modules` fallback. This prevents links left by an older installation from delaying profile discovery; settings, credentials, sessions, workspaces, live links, and ordinary files are not changed.
+
 ## Development override
 
 Source runs use `node` from `PATH` by default. Set `DSH_DESKTOP_NODE` to an absolute Node.js executable path when a different compatible runtime is required.

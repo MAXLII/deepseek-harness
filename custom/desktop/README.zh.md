@@ -31,6 +31,8 @@ pnpm desktop:dist:win
 
 产物写入 `custom/desktop/dist/`。打包过程会把执行构建时使用的 Node.js 可执行文件复制进应用，因此安装后的桌面应用不依赖系统另行安装 Node.js，也不要求 `PATH` 中存在 Node.js。
 
+启动时，桌面宿主只会清理自动生成的 `$DSH_HOME/profiles/node_modules` 回退目录中已经失效的 Junction 和符号链接，防止旧安装遗留的链接拖慢 profile 发现。设置、凭据、会话、工作区、仍然有效的链接和普通文件均不会被修改。
+
 ## 开发覆盖项
 
 源码运行默认使用 `PATH` 中的 `node`。需要改用其他兼容运行时时，可将 `DSH_DESKTOP_NODE` 设为 Node.js 可执行文件的绝对路径。

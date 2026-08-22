@@ -14,7 +14,7 @@ const { ctx, shutdown } = await runProfile({
   environment: loadLayeredEnv('dsh'),
   profile: 'web',
   patchFiles: [],
-  args: ['--host', '127.0.0.1', '--port', '0'],
+  args: ['--host', '127.0.0.1', '--port', '0', '--no-open'],
 })
 
 process.stdout.write(`dsh desktop ready: http://127.0.0.1:${String(ctx.webServer.port)}\n`)
