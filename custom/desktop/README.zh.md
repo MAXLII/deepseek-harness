@@ -29,7 +29,7 @@ pnpm desktop:pack:win
 pnpm desktop:dist:win
 ```
 
-产物写入 `apps/desktop/dist/`。打包过程会把执行构建时使用的 Node.js 可执行文件复制进应用，因此安装后的桌面应用不依赖系统另行安装 Node.js，也不要求 `PATH` 中存在 Node.js。
+产物写入 `custom/desktop/dist/`。打包过程会把执行构建时使用的 Node.js 可执行文件复制进应用，因此安装后的桌面应用不依赖系统另行安装 Node.js，也不要求 `PATH` 中存在 Node.js。
 
 ## 开发覆盖项
 

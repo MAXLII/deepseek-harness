@@ -38,7 +38,7 @@ pnpm dsh web
 
 ### Windows desktop app
 
-The Windows desktop app wraps the same local Web UI in a native application window. To run it from source or build an installer, see the [desktop app guide](apps/desktop/README.md).
+The Windows desktop app wraps the same local Web UI in a native application window. To run it from source or build an installer, see the [custom desktop app guide](custom/desktop/README.md).
 
 ## Community and support
 

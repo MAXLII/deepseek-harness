@@ -29,7 +29,7 @@ Create an x64 NSIS installer with Start menu and desktop shortcuts:
 pnpm desktop:dist:win
 ```
 
-Artifacts are written under `apps/desktop/dist/`. Packaging copies the Node.js executable used for the build into the application, so the installed desktop app does not depend on Node.js being installed or available on `PATH`.
+Artifacts are written under `custom/desktop/dist/`. Packaging copies the Node.js executable used for the build into the application, so the installed desktop app does not depend on Node.js being installed or available on `PATH`.
 
 ## Development override
 

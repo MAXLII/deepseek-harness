@@ -10,7 +10,7 @@ DeepSeek Harness has a browser UI but no installable desktop entry. Reusing the 
 
 ## Decision
 
-`apps/desktop` is a Windows Electron host. Its main process starts the private `apps/cli/lib/desktop-child.js` entry in a separate standard Node.js process. The child starts the shipped `web` profile on `127.0.0.1` with port `0`, reports the selected origin through a single readiness line, and accepts an IPC shutdown message. Electron loads that origin only after readiness and joins the child's graceful shutdown before exiting.
+`custom/desktop` is a Windows Electron host. Its main process starts the private `apps/cli/lib/desktop-child.js` entry in a separate standard Node.js process. The child starts the shipped `web` profile on `127.0.0.1` with port `0`, reports the selected origin through a single readiness line, and accepts an IPC shutdown message. Electron loads that origin only after readiness and joins the child's graceful shutdown before exiting.
 
 Windows packages include the same `node.exe` that ran the package build. A packaging preparation step also stages every built `@deepseek-ai` workspace package and merges them into the application because electron-builder's pnpm collector omits transitive peer dependencies, while the Harness plugin graph deliberately uses peers for shared Cordis runtime context. The application is left outside ASAR because the external Node.js process must read the packaged JavaScript and dependency tree through ordinary filesystem paths.
 

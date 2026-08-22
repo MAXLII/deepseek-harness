@@ -10,7 +10,7 @@ DeepSeek Harness 已提供浏览器 UI，但没有可安装的桌面入口。直
 
 ## Decision
 
-`apps/desktop` 是 Windows Electron 宿主。它的主进程在独立标准 Node.js 进程中启动私有入口 `apps/cli/lib/desktop-child.js`。子进程在 `127.0.0.1` 上以端口 `0` 启动随附的 `web` profile，通过单行就绪消息报告实际源，并接受 IPC 关闭消息。Electron 只在收到就绪消息后加载该源，并在退出前等待子进程完成资源释放。
+`custom/desktop` 是 Windows Electron 宿主。它的主进程在独立标准 Node.js 进程中启动私有入口 `apps/cli/lib/desktop-child.js`。子进程在 `127.0.0.1` 上以端口 `0` 启动随附的 `web` profile，通过单行就绪消息报告实际源，并接受 IPC 关闭消息。Electron 只在收到就绪消息后加载该源，并在退出前等待子进程完成资源释放。
 
 Windows 包内包含执行打包构建时所用的同一个 `node.exe`。打包准备步骤还会暂存所有构建后的 `@deepseek-ai` 工作区包并将其合并进应用；这是因为 electron-builder 的 pnpm 收集器会忽略传递对等依赖，而 Harness 插件图有意使用对等依赖来共享 Cordis 运行时上下文。应用不放入 ASAR，因为外部 Node.js 进程必须通过普通文件系统路径读取打包后的 JavaScript 和依赖树。
 

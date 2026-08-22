@@ -42,7 +42,7 @@ pnpm dsh web
 
 ### Windows 桌面应用
 
-Windows 桌面应用把同一个本地 Web UI 放入原生应用窗口中。源码运行方式和安装程序构建方法见[桌面应用指南](apps/desktop/README.zh.md)。
+Windows 桌面应用把同一个本地 Web UI 放入原生应用窗口中。源码运行方式和安装程序构建方法见[定制桌面应用指南](custom/desktop/README.zh.md)。
 
 ## 社区与支持
 

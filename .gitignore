@@ -31,8 +31,8 @@ python/sdk-runtime/src/deepseek_harness_runtime/runtime/node/
 python/**/__pycache__/
 python/**/.pytest_cache/
 apps/web/dist/
-apps/desktop/dist/
-apps/desktop/build/
+custom/desktop/dist/
+custom/desktop/build/
 .artifacts/
 .dsh-build/
 .playwright-mcp/

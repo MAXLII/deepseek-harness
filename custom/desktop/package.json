@@ -9,6 +9,7 @@
   "author": "DeepSeek AI",
   "scripts": {
     "build": "tsc -b && tsdown",
+    "test": "vitest run --config vitest.config.ts",
     "start": "electron .",
     "prepare-runtime": "node scripts/prepare-runtime.mjs",
     "pack:win": "pnpm run prepare-runtime && electron-builder --win dir",
